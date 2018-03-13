@@ -1,0 +1,166 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      <ion-item class="item item-trns text-center">
+        <ion-avatar item-left *ngIf="afAuth.authState | async">
+          <img src={{currentUser.photoURL}}>
+        </ion-avatar>
+        <h1>The Social Network</h1>
+        <button ion-fab item-end color="danger" *ngIf="afAuth.authState | async as user; else showLogin" (click)="logout()">
+          <ion-icon name="exit"></ion-icon>
+        </button>
+      </ion-item>
+
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <div *ngIf="afAuth.authState | async as user">
+    <h2>Welcome Home {{user.displayName}}!</h2>
+
+    <textarea id="textArea" rows="4" cols="50" placeholder="Describe yourself"></textarea>
+
+    <div>
+      <button (click)="post()" ion-button icon-left>
+        <ion-icon name="create"></ion-icon>
+        Post
+      </button>
+    </div>
+
+    <div *ngIf="fillArray()"></div>
+
+    <ion-card>
+      <ion-item>
+        <h1>My Posts</h1>
+      </ion-item>
+      <div *ngFor="let index of fakeArray">
+        <div *ngFor="let post of posts | async">
+          <div *ngIf="post.likes == index && (post.privacyState == 'Public' || post.authorName == currentUser.displayName)">
+            <ion-card class="cardSize">
+              <ion-item>
+                <ion-avatar item-start>
+                  <img src="{{post.authorPhoto}}">
+                </ion-avatar>
+                <h2>{{post.authorName}}</h2>
+                <p>{{post.date}}</p>
+              </ion-item>
+
+              <ion-card-content>
+                <p>{{post.message}}</p>
+              </ion-card-content>
+
+              <ion-row>
+                <ion-col>
+                  <button (click)="like(post.id, post.likes)" ion-button icon-left clear small>
+                    <ion-icon name="thumbs-up"></ion-icon>
+                    <div>{{post.likes}}</div>
+                  </button>
+                </ion-col>
+                <ion-col>
+                  <button (click)="dislike(post.id, post.dislikes)" ion-button icon-left clear small>
+                    <ion-icon name="thumbs-down"></ion-icon>
+                    <div>{{post.dislikes}}</div>
+                  </button>
+                </ion-col>
+                <ion-col center text-center>
+                  <ion-note>
+                    {{post.privacyState}}
+                  </ion-note>
+                </ion-col>
+              </ion-row>
+            </ion-card>
+          </div>
+        </div>
+      </div>
+    </ion-card>
+
+    <div *ngIf="fillArray()"></div>
+
+
+    <ion-card>
+      <ion-item>
+        <h1>My Friends Posts</h1>
+      </ion-item>
+      <div *ngFor="let index of fakeArray">
+        <div *ngFor="let relation of relations | async">
+          <div *ngFor="let post of posts | async">
+            <ion-card class="cardSize" *ngIf="post.likes == index && (isFollower(relation.followedUser, relation.user, currentUser.uid, post.authorId))">
+              <ion-item>
+                <ion-avatar item-start>
+                  <img src="{{post.authorPhoto}}">
+                </ion-avatar>
+                <h2>{{post.authorName}}</h2>
+                <p>{{post.date}}</p>
+              </ion-item>
+
+              <ion-card-content>
+                <p>{{post.message}}</p>
+              </ion-card-content>
+
+              <ion-row>
+                <ion-col>
+                  <button (click)="like(post.id, post.likes)" ion-button icon-left clear small>
+                    <ion-icon name="thumbs-up"></ion-icon>
+                    <div>{{post.likes}}</div>
+                  </button>
+                </ion-col>
+                <ion-col>
+                  <button (click)="dislike(post.id, post.dislikes)" ion-button icon-left clear small>
+                    <ion-icon name="thumbs-down"></ion-icon>
+                    <div>{{post.dislikes}}</div>
+                  </button>
+                </ion-col>
+                <ion-col center text-center>
+                  <ion-note>
+                    {{post.privacyState}}
+                  </ion-note>
+                </ion-col>
+              </ion-row>
+            </ion-card>
+          </div>
+        </div>
+      </div>
+    </ion-card>
+
+    <input type="text" id="searchInput" (keyup)="searchUsers()" placeholder="Search for friends..">
+
+    <table id="userTable">
+      <thead>
+        <tr class="header">
+          <th>Users in Social Network</th>
+          <th>Follow</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="whenFocus" *ngFor="let user of users | async">
+          <td>{{user.displayName}}</td>
+          <td (click)="follow(currentUser.uid, user.userId, currentUser.displayName, user.displayName)">
+            <img src="../../assets/imgs/thumbsUp.png">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+    <ion-fab right bottom>
+      <button ion-fab (click)="addSong()">
+        <ion-icon name="add"></ion-icon>
+      </button>
+    </ion-fab>
+
+  </div>
+  <ng-template #showLogin>
+    <button ion-fab item-end color="primary" (click)="login()">
+      <ion-icon name="logo-googleplus"></ion-icon>
+    </button>
+  </ng-template>
+</ion-content>
